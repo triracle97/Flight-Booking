@@ -1,130 +1,110 @@
-﻿using System;
-using System.Web;
-using Microsoft.AspNet.Identity;
-using Microsoft.AspNet.Identity.Owin;
+﻿using Microsoft.AspNet.Identity;
 using Microsoft.Owin.Security;
-using Owin;
-using FlightBookingWebsite.Models;
+using System;
+using System.Web;
+using FlightBookingWebsite;
 
-namespace FlightBookingWebsite.Account
+public partial class Account_RegisterExternalLogin : System.Web.UI.Page
 {
-    public partial class RegisterExternalLogin : System.Web.UI.Page
+    protected string ProviderName
     {
-        protected string ProviderName
-        {
-            get { return (string)ViewState["ProviderName"] ?? String.Empty; }
-            private set { ViewState["ProviderName"] = value; }
-        }
+        get { return (string)ViewState["ProviderName"] ?? String.Empty; }
+        private set { ViewState["ProviderName"] = value; }
+    }
 
-        protected string ProviderAccountKey
-        {
-            get { return (string)ViewState["ProviderAccountKey"] ?? String.Empty; }
-            private set { ViewState["ProviderAccountKey"] = value; }
-        }
+    protected string ProviderAccountKey
+    {
+        get { return (string)ViewState["ProviderAccountKey"] ?? String.Empty; }
+        private set { ViewState["ProviderAccountKey"] = value; }
+    }
 
-        private void RedirectOnFail()
+    protected void Page_Load()
+    {
+        // Process the result from an auth provider in the request
+        ProviderName = IdentityHelper.GetProviderNameFromRequest(Request);
+        if (String.IsNullOrEmpty(ProviderName))
         {
-            Response.Redirect((User.Identity.IsAuthenticated) ? "~/Account/Manage" : "~/Account/Login");
+            Response.Redirect("~/Account/Login");
         }
-
-        protected void Page_Load()
+        if (!IsPostBack)
         {
-            // Process the result from an auth provider in the request
-            ProviderName = IdentityHelper.GetProviderNameFromRequest(Request);
-            if (String.IsNullOrEmpty(ProviderName))
+            var manager = new UserManager();
+            var loginInfo = Context.GetOwinContext().Authentication.GetExternalLoginInfo();
+            if (loginInfo == null)
             {
-                RedirectOnFail();
-                return;
+                Response.Redirect("~/Account/Login");
             }
-            if (!IsPostBack)
+            var user = manager.Find(loginInfo.Login);
+            if (user != null)
             {
-                var manager = Context.GetOwinContext().GetUserManager<ApplicationUserManager>();
-                var signInManager = Context.GetOwinContext().Get<ApplicationSignInManager>();
-                var loginInfo = Context.GetOwinContext().Authentication.GetExternalLoginInfo();
-                if (loginInfo == null)
+                IdentityHelper.SignIn(manager, user, isPersistent: false);
+                IdentityHelper.RedirectToReturnUrl(Request.QueryString["ReturnUrl"], Response);
+            }
+            else if (User.Identity.IsAuthenticated)
+            {
+                // Apply Xsrf check when linking
+                var verifiedloginInfo = Context.GetOwinContext().Authentication.GetExternalLoginInfo(IdentityHelper.XsrfKey, User.Identity.GetUserId());
+                if (verifiedloginInfo == null)
                 {
-                    RedirectOnFail();
-                    return;
+                    Response.Redirect("~/Account/Login");
                 }
-                var user = manager.Find(loginInfo.Login);
-                if (user != null)
-                {
-                    signInManager.SignIn(user, isPersistent: false, rememberBrowser: false);
-                    IdentityHelper.RedirectToReturnUrl(Request.QueryString["ReturnUrl"], Response);
-                }
-                else if (User.Identity.IsAuthenticated)
-                {
-                    // Apply Xsrf check when linking
-                    var verifiedloginInfo = Context.GetOwinContext().Authentication.GetExternalLoginInfo(IdentityHelper.XsrfKey, User.Identity.GetUserId());
-                    if (verifiedloginInfo == null)
-                    {
-                        RedirectOnFail();
-                        return;
-                    }
 
-                    var result = manager.AddLogin(User.Identity.GetUserId(), verifiedloginInfo.Login);
-                    if (result.Succeeded)
-                    {
-                        IdentityHelper.RedirectToReturnUrl(Request.QueryString["ReturnUrl"], Response);
-                    }
-                    else
-                    {
-                        AddErrors(result);
-                        return;
-                    }
+                var result = manager.AddLogin(User.Identity.GetUserId(), verifiedloginInfo.Login);
+                if (result.Succeeded)
+                {
+                    IdentityHelper.RedirectToReturnUrl(Request.QueryString["ReturnUrl"], Response);
                 }
                 else
                 {
-                    email.Text = loginInfo.Email;
+                    AddErrors(result);
+                    return;
                 }
             }
-        }        
-        
-        protected void LogIn_Click(object sender, EventArgs e)
-        {
-            CreateAndLoginUser();
-        }
-
-        private void CreateAndLoginUser()
-        {
-            if (!IsValid)
+            else
             {
+                userName.Text = loginInfo.DefaultUserName;
+            }
+        }
+    }
+
+    protected void LogIn_Click(object sender, EventArgs e)
+    {
+        CreateAndLoginUser();
+    }
+
+    private void CreateAndLoginUser()
+    {
+        if (!IsValid)
+        {
+            return;
+        }
+        var manager = new UserManager();
+        var user = new ApplicationUser() { UserName = userName.Text };
+        IdentityResult result = manager.Create(user);
+        if (result.Succeeded)
+        {
+            var loginInfo = Context.GetOwinContext().Authentication.GetExternalLoginInfo();
+            if (loginInfo == null)
+            {
+                Response.Redirect("~/Account/Login");
                 return;
             }
-            var manager = Context.GetOwinContext().GetUserManager<ApplicationUserManager>();
-            var signInManager = Context.GetOwinContext().GetUserManager<ApplicationSignInManager>();
-            var user = new ApplicationUser() { UserName = email.Text, Email = email.Text };
-            IdentityResult result = manager.Create(user);
+            result = manager.AddLogin(user.Id, loginInfo.Login);
             if (result.Succeeded)
             {
-                var loginInfo = Context.GetOwinContext().Authentication.GetExternalLoginInfo();
-                if (loginInfo == null)
-                {
-                    RedirectOnFail();
-                    return;
-                }
-                result = manager.AddLogin(user.Id, loginInfo.Login);
-                if (result.Succeeded)
-                {
-                    signInManager.SignIn(user, isPersistent: false, rememberBrowser: false);
-
-                    // For more information on how to enable account confirmation and password reset please visit http://go.microsoft.com/fwlink/?LinkID=320771
-                    // var code = manager.GenerateEmailConfirmationToken(user.Id);
-                    // Send this link via email: IdentityHelper.GetUserConfirmationRedirectUrl(code, user.Id)
-
-                    IdentityHelper.RedirectToReturnUrl(Request.QueryString["ReturnUrl"], Response);
-                    return;
-                }
+                IdentityHelper.SignIn(manager, user, isPersistent: false);
+                IdentityHelper.RedirectToReturnUrl(Request.QueryString["ReturnUrl"], Response);
+                return;
             }
-            AddErrors(result);
         }
+        AddErrors(result);
+    }
 
-        private void AddErrors(IdentityResult result) 
+    private void AddErrors(IdentityResult result)
+    {
+        foreach (var error in result.Errors)
         {
-            foreach (var error in result.Errors) 
-            {
-                ModelState.AddModelError("", error);
-            }
+            ModelState.AddModelError("", error);
         }
     }
 }
