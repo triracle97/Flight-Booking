@@ -1,4 +1,4 @@
-﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Site.master.cs" Inherits="FlightBookingWebsite.SiteMaster" %>
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeFile="Site.master.cs" Inherits="SiteMaster" %>
 
 <!DOCTYPE html>
 
@@ -11,7 +11,7 @@
     <asp:PlaceHolder runat="server">
         <%: Scripts.Render("~/bundles/modernizr") %>
     </asp:PlaceHolder>
-    <webopt:bundlereference runat="server" path="~/Content/css" />
+    <webopt:BundleReference runat="server" Path="~/Content/css" />
     <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
 
 </head>
@@ -19,7 +19,7 @@
     <form runat="server">
         <asp:ScriptManager runat="server">
             <Scripts>
-                <%--To learn more about bundling scripts in ScriptManager see http://go.microsoft.com/fwlink/?LinkID=301884 --%>
+                <%--To learn more about bundling scripts in ScriptManager see https://go.microsoft.com/fwlink/?LinkID=301884 --%>
                 <%--Framework Scripts--%>
                 <asp:ScriptReference Name="MsAjaxBundle" />
                 <asp:ScriptReference Name="jquery" />
@@ -46,15 +46,33 @@
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-                    <a class="navbar-brand" runat="server" href="~/">Baka Flight Booking</a>
+                    <a class="navbar-brand" runat="server" href="~/">BakaFlightBooking</a>
                 </div>
                 <div class="navbar-collapse collapse">
                     <ul class="nav navbar-nav">
-                        <li><a runat="server" href="~/About">About us</a></li>
-                      <!--   <li><a runat="server" href="~/">Home</a></li>
-                        <li><a runat="server" href="~/Contact">Contact</a></li>
-                          -->
+                        <%
+                            //var role = GetCurrentUserRole();
+                            if (false)//role == CityBusSystem.Role.Admin
+                            {
+                        %>
+                        <li><a runat="server" href="~/AdminPages/ListCity.aspx">Cities</a></li>
+                        <li><a runat="server" href="~/AdminPages/ListRoute.aspx">Routes</a></li>
+                        <li><a runat="server" href="~/AdminPages/ListBus.aspx">Buses</a></li>
+                        <li><a runat="server" href="~/AdminPages/ListAgent.aspx">Agents</a></li>
+                        <%
+                            }
+                            else if (true)//role == CityBusSystem.Role.Agent
+                            {
+                        %>
+                        <!--Có thanh search để search các chuyến bay, List of Flights-->
+                        <li><a runat="server" href="~/Account/FlightBooking.aspx">Book A Flight</a></li>
+                        <!--Giỏ hàng-->
+                        <li><a runat="server" href="~/Account/CartManaging.aspx">My Cart</a></li>
+                        <%
+                            }
+                        %>
                     </ul>
+
                     <asp:LoginView runat="server" ViewStateMode="Disabled">
                         <AnonymousTemplate>
                             <ul class="nav navbar-nav navbar-right">
@@ -64,7 +82,7 @@
                         </AnonymousTemplate>
                         <LoggedInTemplate>
                             <ul class="nav navbar-nav navbar-right">
-                                <li><a runat="server" href="~/Account/Manage" title="Manage your account">Hello, <%: Context.User.Identity.GetUserName()  %> !</a></li>
+                                <li><a runat="server" href="~/Account/Manage" title="Manage your account">Hello, <%: Context.User.Identity.GetUserName()  %>!</a></li>
                                 <li>
                                     <asp:LoginStatus runat="server" LogoutAction="Redirect" LogoutText="Log off" LogoutPageUrl="~/" OnLoggingOut="Unnamed_LoggingOut" />
                                 </li>
@@ -79,7 +97,7 @@
             </asp:ContentPlaceHolder>
             <hr />
             <footer>
-                <p>&copy; <%: DateTime.Now.Year %> - Baka Team</p>
+                <p>&copy; <%: DateTime.Now.Year %> - BakaTeam</p>
             </footer>
         </div>
     </form>
