@@ -4,6 +4,7 @@ using System;
 using System.Web;
 using System.Web.UI;
 using FlightBookingWebsite;
+using FlightBookingWebsite.Models;
 
 public partial class Account_Login : Page
 {
@@ -23,8 +24,9 @@ public partial class Account_Login : Page
             if (IsValid)
             {
                 // Validate the user password
-                var manager = new UserManager();
-                ApplicationUser user = manager.Find(UserName.Text, Password.Text);
+                //var manager = new UserManager();
+                var manager = new AirlineTicketBookingDBContext();
+                User user = manager.Users.Find(UserName.Text, Password.Text);
                 if (user != null)
                 {
                     IdentityHelper.SignIn(manager, user, RememberMe.Checked);

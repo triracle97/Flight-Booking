@@ -172,6 +172,7 @@
     <Compile Include="Contact.aspx.designer.cs">
       <DependentUpon>Contact.aspx</DependentUpon>
     </Compile>
+    <Compile Include="DAO\DbInitializer.cs" />
     <Compile Include="Default.aspx.cs">
       <DependentUpon>Default.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -182,6 +183,35 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\AirlineTicketBookingDBContext.cs" />
+    <Compile Include="Models\Airplane.cs" />
+    <Compile Include="Models\AirplaneSeat.cs" />
+    <Compile Include="Models\Airport.cs" />
+    <Compile Include="Models\Booking.cs" />
+    <Compile Include="Models\Flight.cs" />
+    <Compile Include="Models\Location.cs" />
+    <Compile Include="Models\Mapping\AirplaneMap.cs" />
+    <Compile Include="Models\Mapping\AirplaneSeatMap.cs" />
+    <Compile Include="Models\Mapping\AirportMap.cs" />
+    <Compile Include="Models\Mapping\BookingMap.cs" />
+    <Compile Include="Models\Mapping\FlightMap.cs" />
+    <Compile Include="Models\Mapping\LocationMap.cs" />
+    <Compile Include="Models\Mapping\PassengerMap.cs" />
+    <Compile Include="Models\Mapping\PaymentMap.cs" />
+    <Compile Include="Models\Mapping\ProducerMap.cs" />
+    <Compile Include="Models\Mapping\RouteMap.cs" />
+    <Compile Include="Models\Mapping\sysdiagramMap.cs" />
+    <Compile Include="Models\Mapping\TicketMap.cs" />
+    <Compile Include="Models\Mapping\TravelClassMap.cs" />
+    <Compile Include="Models\Mapping\UserMap.cs" />
+    <Compile Include="Models\Passenger.cs" />
+    <Compile Include="Models\Payment.cs" />
+    <Compile Include="Models\Producer.cs" />
+    <Compile Include="Models\Route.cs" />
+    <Compile Include="Models\sysdiagram.cs" />
+    <Compile Include="Models\Ticket.cs" />
+    <Compile Include="Models\TravelClass.cs" />
+    <Compile Include="Models\User.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Site.Master.cs">
       <DependentUpon>Site.Master</DependentUpon>
